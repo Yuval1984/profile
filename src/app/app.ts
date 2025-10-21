@@ -47,12 +47,13 @@ interface Experience {
 export class AppComponent implements OnInit, AfterViewInit, OnDestroy {
   private observer: IntersectionObserver | null = null;
   private experienceObserver: IntersectionObserver | null = null;
+  private sectionIntersections: Map<string, number> = new Map();
   scrollProgress: number = 0;
   sectionState = {
-    profile: { visible: false, hasAnimated: false },
-    skills: { visible: false, hasAnimated: false },
-    experience: { visible: false, hasAnimated: false },
-    gallery: { visible: false, hasAnimated: false }
+    profile: { visible: false, hasAnimated: false, active: false },
+    skills: { visible: false, hasAnimated: false, active: false },
+    experience: { visible: false, hasAnimated: false, active: false },
+    gallery: { visible: false, hasAnimated: false, active: false }
   };
 
   galleryItems = [
@@ -290,18 +291,42 @@ export class AppComponent implements OnInit, AfterViewInit, OnDestroy {
           if (!sectionId) return;
 
           const section = this.sectionState[sectionId as keyof typeof this.sectionState];
+
+          // Handle visibility for animations
           if (entry.isIntersecting) {
             section.visible = true;
           } else {
             section.visible = false;
-            section.hasAnimated = false; // Reset animation state when section leaves viewport
+            section.hasAnimated = false;
           }
-          this.cdr.detectChanges();
+
+          // Store the intersection ratio for each section
+          this.sectionIntersections.set(sectionId, entry.intersectionRatio);
         });
+
+        // Find the section with the highest intersection ratio
+        let maxRatio = 0;
+        let activeSection = '';
+
+        this.sectionIntersections.forEach((ratio, sectionId) => {
+          if (ratio > maxRatio) {
+            maxRatio = ratio;
+            activeSection = sectionId;
+          }
+        });
+
+        // Only update active state if there's a clear winner (ratio > 0.1)
+        if (maxRatio > 0.1) {
+          Object.keys(this.sectionState).forEach(key => {
+            const section = this.sectionState[key as keyof typeof this.sectionState];
+            section.active = (key === activeSection);
+          });
+          this.cdr.detectChanges();
+        }
       },
       {
         threshold: [0, 0.1, 0.2, 0.3, 0.4, 0.5],
-        rootMargin: '-50px'
+        rootMargin: '-80px 0px -80px 0px'
       }
     );
 

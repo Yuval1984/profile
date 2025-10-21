@@ -5,7 +5,7 @@
         mat-button
         (click)="scrollToSection('profile')"
         class="nav-button"
-        [class.active]="sectionState.profile.visible"
+        [class.active]="sectionState.profile.active"
       >
         <mat-icon>person</mat-icon>
         Profile
@@ -14,7 +14,7 @@
         mat-button
         (click)="scrollToSection('skills')"
         class="nav-button"
-        [class.active]="sectionState.skills.visible"
+        [class.active]="sectionState.skills.active"
       >
         <mat-icon>code</mat-icon>
         Tech Skills
@@ -23,7 +23,7 @@
         mat-button
         (click)="scrollToSection('experience')"
         class="nav-button"
-        [class.active]="sectionState.experience.visible"
+        [class.active]="sectionState.experience.active"
       >
         <mat-icon>work</mat-icon>
         Experience
@@ -32,7 +32,7 @@
         mat-button
         (click)="scrollToSection('gallery')"
         class="nav-button"
-        [class.active]="sectionState.gallery?.visible"
+        [class.active]="sectionState.gallery?.active"
       >
         <mat-icon>photo_library</mat-icon>
         Portfolio
