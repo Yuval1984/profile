@@ -32,7 +32,7 @@
         mat-button
         (click)="scrollToSection('gallery')"
         class="nav-button"
-        [class.active]="sectionState.gallery?.active"
+        [class.active]="sectionState.gallery!.active"
       >
         <mat-icon>photo_library</mat-icon>
         Portfolio
@@ -73,10 +73,16 @@
       </a>
     </div>
   </div>
+  <div class="scroll-progress-container">
+    <div class="scroll-progress-bar" [style.width.%]="scrollProgress"></div>
+  </div>
 </mat-toolbar>
-<div class="scroll-progress-container">
-  <div class="scroll-progress-bar" [style.width.%]="scrollProgress"></div>
-</div>
+
+<!-- Floating Contact Button for Mobile -->
+<button mat-raised-button class="floating-contact-btn" (click)="openContactDialog()">
+  <mat-icon>contact_mail</mat-icon>
+  Contact Me
+</button>
 
 <main class="main-content">
   <!-- Profile Section -->
@@ -256,15 +262,15 @@
   </section>
   <section class="section gallery-section" id="gallery">
     <div class="content-container">
-      <h2 class="section-title" [@fadeInUp]="sectionState.gallery?.visible ? 'visible' : 'hidden'">
-        Project Gallery
+      <h2 class="section-title" [@fadeInUp]="sectionState.gallery!.visible ? 'visible' : 'hidden'">
+        Portfolio Gallery
       </h2>
       <div class="gallery-container">
         <div
           class="gallery-row"
           *ngFor="let item of galleryItems; let i = index"
           [@portfolioAnimation]="{
-            value: sectionState.gallery?.visible ? 'visible' : 'hidden',
+            value: sectionState.gallery!.visible ? 'visible' : 'hidden',
             params: {
               delay: i * 200 + 'ms',
               startX: i % 2 === 0 ? '-100%' : '100%'
