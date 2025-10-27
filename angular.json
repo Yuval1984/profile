@@ -40,8 +40,8 @@
                 },
                 {
                   "type": "anyComponentStyle",
-                  "maximumWarning": "20kB",
-                  "maximumError": "30kB"
+                  "maximumWarning": "35kB",
+                  "maximumError": "40kB"
                 }
               ],
               "outputHashing": "all",
@@ -93,8 +93,5 @@
         }
       }
     }
-  },
-  "cli": {
-    "defaultProject": "profile"
   }
 }

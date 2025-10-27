@@ -1,5 +1,14 @@
 <mat-toolbar class="toolbar">
   <div class="toolbar-content">
+    <!-- Left Side - Stats Display -->
+    <div class="toolbar-left">
+      <div class="stats-display" *ngIf="stats && stats.days && stats.days.length > 0">
+        <mat-icon class="stats-icon">visibility</mat-icon>
+        <span class="stats-text">{{ stats.days[0].totalVisits }} visits</span>
+      </div>
+    </div>
+
+    <!-- Center - Navigation Buttons -->
     <div class="nav-buttons">
       <button
         mat-button
@@ -60,18 +69,6 @@
         </button>
       </mat-menu>
     </div>
-    <div class="action-buttons">
-      <a
-        href="assets/Yuval Kogan CV - Senior Front-End Developer.pdf"
-        download
-        mat-raised-button
-        color="primary"
-        class="download-cv"
-      >
-        <mat-icon>download</mat-icon>
-        Download CV
-      </a>
-    </div>
   </div>
   <div class="scroll-progress-container">
     <div class="scroll-progress-bar" [style.width.%]="scrollProgress"></div>
@@ -83,6 +80,12 @@
   <mat-icon>contact_mail</mat-icon>
   Contact Me
 </button>
+
+<!-- Floating Stats Badge for Mobile -->
+<div class="floating-stats-badge" *ngIf="stats && stats.days && stats.days.length > 0">
+  <mat-icon>visibility</mat-icon>
+  <span>{{ stats.days[0].totalVisits }}</span>
+</div>
 
 <main class="main-content">
   <!-- Profile Section -->

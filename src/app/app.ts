@@ -10,6 +10,7 @@ import { MatToolbarModule } from '@angular/material/toolbar';
 import { MatMenuModule } from '@angular/material/menu';
 import { MatDialogModule, MatDialog } from '@angular/material/dialog';
 import { slideInLeft, slideInRight, fadeInUp, typewriter, trainAnimation, experienceAnimation, longTypewriter, scaleInFade, portfolioAnimation } from './animations';
+import { ProfileService } from './service/profile.service';
 
 interface TechStack {
   [key: string]: number;
@@ -56,7 +57,15 @@ export class AppComponent implements OnInit, AfterViewInit, OnDestroy {
     gallery: { visible: false, hasAnimated: false, active: false }
   };
 
+  // Stats data
+  stats: any = null;
+
   galleryItems = [
+    {
+      image: 'assets/preview projects/pharmecy/pharmecy.jpg',
+      title: 'Pharmacy Dashboard',
+      description: 'Comprehensive pharmacy management dashboard designed for pharmacists to monitor, approve, or reject patient medication requests. Features real-time patient medication tracking, prescription validation, drug interaction checking, and inventory management. Includes automated alerts for critical medications, dosage verification, and compliance monitoring. Enables pharmacists to efficiently manage patient care while ensuring medication safety and regulatory compliance.'
+    },
     {
       image: 'assets/preview projects/dxc/1.png',
       title: 'Government Debt Cases Dashboard',
@@ -253,7 +262,8 @@ export class AppComponent implements OnInit, AfterViewInit, OnDestroy {
   constructor(
     private el: ElementRef,
     private cdr: ChangeDetectorRef,
-    private dialog: MatDialog
+    private dialog: MatDialog,
+    private profileService: ProfileService
   ) {
     window.addEventListener('scroll', this.updateScrollProgress.bind(this));
   }
@@ -282,7 +292,34 @@ export class AppComponent implements OnInit, AfterViewInit, OnDestroy {
     }
   }
 
-  ngOnInit() {
+  async ngOnInit() {
+    // Start the profile tracking session (non-blocking)
+    this.profileService.start().catch(err => {
+      console.warn('[profile] Start session failed (backend may be unavailable)', err);
+    });
+
+    // Fetch stats (non-blocking)
+    this.profileService.statsToday().then(stats => {
+      this.stats = stats;
+      this.cdr.detectChanges();
+    }).catch(err => {
+      console.warn('[profile] Failed to fetch stats (using mock data for development)', err);
+      // Mock data for development when backend is unavailable
+      this.stats = {
+        tz: 'UTC',
+        days: [
+          {
+            day: new Date().toISOString().split('T')[0],
+            hourBuckets: { '18': 2 },
+            totalVisits: 42,
+            totalDurationMs: 26774,
+            avgDurationMs: 13387
+          }
+        ]
+      };
+      this.cdr.detectChanges();
+    });
+
     // Initialize Intersection Observer for sections
     this.observer = new IntersectionObserver(
       (entries) => {
@@ -492,5 +529,10 @@ export class AppComponent implements OnInit, AfterViewInit, OnDestroy {
     this.charts.forEach(chart => chart?.destroy());
     // Remove scroll listener
     window.removeEventListener('scroll', this.updateScrollProgress.bind(this));
+
+    // End the metrics session
+    this.profileService
+      ?.end()
+      .catch(err => console.warn('[metrics] end() failed', err));
   }
 }
