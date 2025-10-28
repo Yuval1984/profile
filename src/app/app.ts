@@ -11,6 +11,7 @@ import { MatMenuModule } from '@angular/material/menu';
 import { MatDialogModule, MatDialog } from '@angular/material/dialog';
 import { slideInLeft, slideInRight, fadeInUp, typewriter, trainAnimation, experienceAnimation, longTypewriter, scaleInFade, portfolioAnimation } from './animations';
 import { ProfileService } from './service/profile.service';
+import { LocationService, GeoLocation } from './service/location.service';
 
 interface TechStack {
   [key: string]: number;
@@ -109,6 +110,12 @@ export class AppComponent implements OnInit, AfterViewInit, OnDestroy {
 
   skills = [
     {
+      name: 'yFiles for HTML',
+      icon: 'assets/yfiles.png',
+      color: '#FF6B35',
+      description: 'Expert in yFiles for HTML diagramming library, creating sophisticated data visualizations, interactive graphs, and complex network diagrams. Implementing custom layouts, node styling, edge routing, and advanced user interactions for enterprise applications.'
+    },
+    {
       name: 'Angular',
       icon: 'assets/angular.png',
       color: '#DD0031',
@@ -149,6 +156,30 @@ export class AppComponent implements OnInit, AfterViewInit, OnDestroy {
       icon: 'assets/css.png',
       color: '#CC6699',
       description: 'Expert in modern CSS3/SCSS with Flexbox, Grid, and custom properties. Implementing BEM methodology, creating maintainable stylesheets, and ensuring cross-browser compatibility. Building responsive designs with mobile-first approach.'
+    },
+    {
+      name: 'Vite',
+      icon: 'assets/vite.png',
+      color: '#646CFF',
+      description: 'Advanced experience with Vite build tool for fast development and optimized production builds. Leveraging native ES modules, hot module replacement, and plugin ecosystem for efficient Angular development workflows. Implementing custom Vite configurations and optimizing bundle sizes.'
+    },
+    {
+      name: 'Playwright',
+      icon: 'assets/playwright.png',
+      color: '#2EAD33',
+      description: 'Expert in Playwright for comprehensive end-to-end testing across multiple browsers and devices. Creating robust test suites, implementing page object models, and ensuring application reliability. Automating complex user workflows and cross-browser compatibility testing.'
+    },
+    {
+      name: 'Ionic',
+      icon: 'assets/ionic.png',
+      color: '#3880FF',
+      description: 'Advanced experience with Ionic framework for building cross-platform mobile applications using web technologies. Creating native-like mobile apps with Angular integration, implementing custom components, and leveraging Capacitor for native device functionality. Building responsive mobile interfaces with Ionic UI components.'
+    },
+    {
+      name: 'Jasmine',
+      icon: 'assets/jasmine.png',
+      color: '#8A4182',
+      description: 'Expert in Jasmine testing framework for comprehensive unit testing of Angular applications. Writing robust test suites with describe blocks, implementing spies and mocks, and ensuring code quality through behavior-driven development. Creating maintainable test cases with proper assertions and test isolation.'
     }
   ];
 
@@ -159,7 +190,12 @@ export class AppComponent implements OnInit, AfterViewInit, OnDestroy {
     { description: this.skills[3].description, active: false },
     { description: this.skills[4].description, active: false },
     { description: this.skills[5].description, active: false },
-    { description: this.skills[6].description, active: false }
+    { description: this.skills[6].description, active: false },
+    { description: this.skills[7].description, active: false },
+    { description: this.skills[8].description, active: false },
+    { description: this.skills[9].description, active: false },
+    { description: this.skills[10].description, active: false },
+    { description: this.skills[11].description, active: false }
   ];
 
   @ViewChildren('techChart') chartCanvases!: QueryList<ElementRef>;
@@ -263,7 +299,8 @@ export class AppComponent implements OnInit, AfterViewInit, OnDestroy {
     private el: ElementRef,
     private cdr: ChangeDetectorRef,
     private dialog: MatDialog,
-    private profileService: ProfileService
+    private profileService: ProfileService,
+    private locationService: LocationService
   ) {
     window.addEventListener('scroll', this.updateScrollProgress.bind(this));
   }
@@ -293,10 +330,14 @@ export class AppComponent implements OnInit, AfterViewInit, OnDestroy {
   }
 
   async ngOnInit() {
-    // Start the profile tracking session (non-blocking)
-    this.profileService.start().catch(err => {
-      console.warn('[profile] Start session failed (backend may be unavailable)', err);
-    });
+    // Start the profile tracking session (non-blocking). Fetch location in background
+    this.locationService
+      .getLocation()
+      .then(loc => this.profileService.start(loc ?? undefined))
+      .catch(() => this.profileService.start())
+      .catch(err => {
+        console.warn('[profile] Start session failed (backend may be unavailable)', err);
+      });
 
     // Fetch stats (non-blocking)
     this.profileService.statsToday().then(stats => {

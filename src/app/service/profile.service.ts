@@ -13,22 +13,53 @@ export class ProfileService implements OnDestroy {
 
     private sessionId: string | null = null;
     private hbTimer: any = null;
-    private boundEndHandler = () => this.end().catch(() => { });
+    // Handlers are declared as class properties so we can properly remove them
+    private boundPageHideHandler = () => this.end().catch(() => { });
+    private boundBeforeUnloadHandler = () => this.end().catch(() => { });
+    private boundVisibilityHandler = () => {
+        if (document.visibilityState === 'visible') {
+            // When the tab becomes visible again, send a heartbeat to mark as active
+            this.heartbeat().catch(() => { });
+        }
+    };
 
     /** Start a session and begin heartbeats */
-    async start(): Promise<string | null> {
+    async start(location?: { lat: number; lon: number; accuracy?: number; source?: 'gps' | 'ip'; city?: string; country?: string; countryCode?: string }): Promise<string | null> {
         try {
             const headers = new HttpHeaders({ 'x-api-key': this.key });
-            const res = await this.http.post<{ sessionId: string }>(`${this.base}/start`, {}, { headers }).toPromise();
+            const body: any = {};
+            if (location) {
+                body.location = location;
+            }
+
+            // Add device info
+            body.device = {
+                userAgent: navigator.userAgent,
+                platform: navigator.platform,
+                language: navigator.language,
+                screen: {
+                    width: screen.width,
+                    height: screen.height
+                },
+                timezone: Intl.DateTimeFormat().resolvedOptions().timeZone
+            };
+
+            const res = await this.http.post<{ sessionId: string }>(`${this.base}/start`, body, { headers }).toPromise();
             this.sessionId = res?.sessionId ?? null;
 
             // heartbeat every N sec
             this.stopHeartbeat();
             this.hbTimer = setInterval(() => this.heartbeat(), environment.HEARTBEAT_MS);
 
-            // end on tab hide/close
-            document.addEventListener('visibilitychange', this.boundEndHandler, { once: false });
-            window.addEventListener('beforeunload', this.boundEndHandler, { once: false });
+            // send an immediate heartbeat so the dashboard marks the user as active right away
+            this.heartbeat().catch(() => { });
+
+            // End on page hide or unload, but not merely on visibility change
+            window.addEventListener('pagehide', this.boundPageHideHandler, { once: false });
+            window.addEventListener('beforeunload', this.boundBeforeUnloadHandler, { once: false });
+
+            // When returning to the tab, nudge activity
+            document.addEventListener('visibilitychange', this.boundVisibilityHandler, { once: false });
 
             return this.sessionId;
         } catch (e) {
@@ -37,21 +68,15 @@ export class ProfileService implements OnDestroy {
         }
     }
 
-    /** Send a heartbeat (keepalive) */
+    /** Send a heartbeat (keep user marked active) */
     async heartbeat(): Promise<void> {
         if (!this.sessionId) return;
-        const body = { sessionId: this.sessionId };
-
-        // Use fetch for keepalive + header support
-        await fetch(`${this.base}/heartbeat`, {
-            method: 'POST',
-            headers: {
-                'Content-Type': 'application/json',
-                'x-api-key': this.key
-            },
-            body: JSON.stringify(body),
-            keepalive: true
-        }).catch(() => { });
+        const headers = new HttpHeaders({ 'x-api-key': this.key });
+        try {
+            await this.http.post(`${this.base}/heartbeat`, { sessionId: this.sessionId }, { headers }).toPromise();
+        } catch {
+            // swallow errors; next tick will retry
+        }
     }
 
     /** End the session and stop heartbeats */
@@ -74,8 +99,9 @@ export class ProfileService implements OnDestroy {
             // ignore network errors on unload
         } finally {
             this.sessionId = null;
-            document.removeEventListener('visibilitychange', this.boundEndHandler);
-            window.removeEventListener('beforeunload', this.boundEndHandler);
+            window.removeEventListener('pagehide', this.boundPageHideHandler);
+            window.removeEventListener('beforeunload', this.boundBeforeUnloadHandler);
+            document.removeEventListener('visibilitychange', this.boundVisibilityHandler);
         }
     }
 
@@ -110,7 +136,8 @@ export class ProfileService implements OnDestroy {
         this.end().catch(err => console.warn('[profile] end failed', err));
 
         // Clean up event listeners
-        document.removeEventListener('visibilitychange', this.boundEndHandler);
-        window.removeEventListener('beforeunload', this.boundEndHandler);
+        window.removeEventListener('pagehide', this.boundPageHideHandler);
+        window.removeEventListener('beforeunload', this.boundBeforeUnloadHandler);
+        document.removeEventListener('visibilitychange', this.boundVisibilityHandler);
     }
 }
