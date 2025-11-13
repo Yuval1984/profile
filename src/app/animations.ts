@@ -105,6 +105,24 @@ export const trainAnimation = trigger('trainAnimation', [
     ])
 ]);
 
+export const slideInSineWave = trigger('slideInSineWave', [
+  transition(':enter', [
+    style({ transform: 'translateX(-150px)', opacity: 0 }),
+    animate('1.2s cubic-bezier(0.25, 0.46, 0.45, 0.94)', keyframes([
+      style({ transform: 'translateX(-150px)', opacity: 0, offset: 0 }),
+      style({ transform: 'translateX(25px)', opacity: 1, offset: 0.3 }),
+      style({ transform: 'translateX(-12px)', offset: 0.5 }),
+      style({ transform: 'translateX(8px)', offset: 0.65 }),
+      style({ transform: 'translateX(-4px)', offset: 0.77 }),
+      style({ transform: 'translateX(3px)', offset: 0.85 }),
+      style({ transform: 'translateX(-1.5px)', offset: 0.91 }),
+      style({ transform: 'translateX(1px)', offset: 0.96 }),
+      style({ transform: 'translateX(-0.5px)', offset: 0.98 }),
+      style({ transform: 'translateX(0)', opacity: 1, offset: 1 })
+    ]))
+  ])
+]);
+
 export const experienceAnimation = trigger('experienceAnimation', [
     state('hidden', style({
         opacity: 0,

@@ -9,7 +9,7 @@ import { MatDividerModule } from '@angular/material/divider';
 import { MatToolbarModule } from '@angular/material/toolbar';
 import { MatMenuModule } from '@angular/material/menu';
 import { MatDialogModule, MatDialog } from '@angular/material/dialog';
-import { slideInLeft, slideInRight, fadeInUp, typewriter, trainAnimation, experienceAnimation, longTypewriter, scaleInFade, portfolioAnimation } from './animations';
+import { slideInLeft, slideInRight, fadeInUp, typewriter, trainAnimation, experienceAnimation, longTypewriter, scaleInFade, portfolioAnimation, slideInSineWave } from './animations';
 import { ProfileService } from './service/profile.service';
 import { LocationService, GeoLocation } from './service/location.service';
 
@@ -44,7 +44,7 @@ interface Experience {
   ],
   templateUrl: './app.html',
   styleUrls: ['./app.scss'],
-  animations: [slideInLeft, slideInRight, fadeInUp, trainAnimation, experienceAnimation, typewriter, longTypewriter, scaleInFade, portfolioAnimation]
+  animations: [slideInLeft, slideInRight, fadeInUp, trainAnimation, experienceAnimation, typewriter, longTypewriter, scaleInFade, portfolioAnimation, slideInSineWave]
 })
 export class AppComponent implements OnInit, AfterViewInit, OnDestroy {
   private observer: IntersectionObserver | null = null;
@@ -52,7 +52,7 @@ export class AppComponent implements OnInit, AfterViewInit, OnDestroy {
   private sectionIntersections: Map<string, number> = new Map();
   scrollProgress: number = 0;
   sectionState = {
-    profile: { visible: false, hasAnimated: false, active: false },
+    profile: { visible: false, hasAnimated: false, active: false, imageAnimated: false },
     skills: { visible: false, hasAnimated: false, active: false },
     experience: { visible: false, hasAnimated: false, active: false },
     gallery: { visible: false, hasAnimated: false, active: false }
@@ -60,6 +60,9 @@ export class AppComponent implements OnInit, AfterViewInit, OnDestroy {
 
   // Stats data
   stats: any = null;
+  showDeviceTypes: boolean = false;
+  isFoldingOut: boolean = false;
+  private deviceTypesTimer: any = null;
 
   galleryItems = [
     {
@@ -103,10 +106,29 @@ export class AppComponent implements OnInit, AfterViewInit, OnDestroy {
     name: 'Yuval Kogan',
     title: 'Senior Front-End Developer',
     education: 'B.Sc. in Computer Science',
-    description:
-      'Senior Front-End Developer with 8+ years of experience in Angular, delivering scalable applications and advanced data visualizations with yFiles for HTML. Expert in creating reusable components, optimizing performance, and building responsive design.',
+    description: [
+      '• Nice to meet you — I\'m Yuval, a Senior Front-End Developer with 8+ years of experience building scalable Angular and React applications.',
+      '• I specialize in Angular 20, TypeScript, RxJS, Signals, NgRx, Angular Material, and CLI, as well as React with Hooks, Zustand, and MUI. I\'ve built complex UI architectures and high-performance data visualizations, including yFiles graphs with 10k+ nodes.',
+      '• One of my key achievements is creating a reusable Angular component library that cut feature delivery time by 40%. I focus on clean, maintainable code, performance, and usability — crafting responsive UIs with HTML5, SCSS, Flexbox, and Grid.',
+      '• I\'ve also mentored front-end teams, driven best practices, and helped align development with business goals. I\'m passionate about building front-end solutions that are powerful, fast, and a joy to use.'
+    ],
     image: 'assets/Profile_Yuval.jpg'
   };
+  
+  profileDescriptionVisible: boolean[] = [];
+
+  animateProfileDescription() {
+    // Initialize all paragraphs as hidden
+    this.profileDescriptionVisible = new Array(this.profile.description.length).fill(false);
+    
+    // Show each paragraph sequentially with delay
+    this.profile.description.forEach((_, index) => {
+      setTimeout(() => {
+        this.profileDescriptionVisible[index] = true;
+        this.cdr.detectChanges();
+      }, index * 1500); // 1500ms delay between each paragraph
+    });
+  }
 
   skills = [
     {
@@ -205,15 +227,103 @@ export class AppComponent implements OnInit, AfterViewInit, OnDestroy {
     return this.experiences[expIndex]?.detailsVisible?.[detailIndex] || false;
   }
 
-  showSkillDescription(index: number) {
-    this.hideSkillDescription();
-    this.skillDescriptions[index].active = true;
-  }
+  isSkillsTapePaused: boolean = false;
+  private skillDescriptionTimer: any = null;
+  private isHoveringSkillsTape: boolean = false;
 
-  hideSkillDescription() {
+  showSkillDescription(index: number) {
+    // Clear any existing timer
+    if (this.skillDescriptionTimer) {
+      clearTimeout(this.skillDescriptionTimer);
+    }
+
+    // Pause the tape
+    this.isSkillsTapePaused = true;
+    
+    // Hide all descriptions first
     for (let skillDescription of this.skillDescriptions) {
       skillDescription.active = false;
     }
+    // Show selected description
+    this.skillDescriptions[index].active = true;
+    this.cdr.detectChanges();
+
+    // Auto-hide and resume movement after 5 seconds
+    this.skillDescriptionTimer = setTimeout(() => {
+      // Hide all descriptions
+      for (let skillDescription of this.skillDescriptions) {
+        skillDescription.active = false;
+      }
+      // Always resume movement after timer expires
+      this.isSkillsTapePaused = false;
+      this.cdr.detectChanges();
+    }, 5000);
+  }
+
+  onSkillsTapeMouseEnter() {
+    this.isHoveringSkillsTape = true;
+    this.isSkillsTapePaused = true;
+  }
+
+  onSkillsTapeMouseLeave() {
+    this.isHoveringSkillsTape = false;
+    // Only resume if no description is active
+    const hasActiveDescription = this.skillDescriptions.some(desc => desc.active);
+    if (!hasActiveDescription) {
+      this.isSkillsTapePaused = false;
+    }
+  }
+
+  onSkillItemHover(index: number) {
+    // Clear any existing timer
+    if (this.skillDescriptionTimer) {
+      clearTimeout(this.skillDescriptionTimer);
+      this.skillDescriptionTimer = null;
+    }
+
+    // Pause the tape
+    this.isSkillsTapePaused = true;
+    
+    // Hide all descriptions first
+    for (let skillDescription of this.skillDescriptions) {
+      skillDescription.active = false;
+    }
+    // Show selected description
+    this.skillDescriptions[index].active = true;
+    this.cdr.detectChanges();
+  }
+
+  onSkillItemLeave() {
+    // Hide all descriptions when mouse leaves
+    for (let skillDescription of this.skillDescriptions) {
+      skillDescription.active = false;
+    }
+    // Resume movement if not hovering over the tape
+    if (!this.isHoveringSkillsTape) {
+      this.isSkillsTapePaused = false;
+    }
+    this.cdr.detectChanges();
+  }
+
+  hideSkillDescription() {
+    if (this.skillDescriptionTimer) {
+      clearTimeout(this.skillDescriptionTimer);
+    }
+    for (let skillDescription of this.skillDescriptions) {
+      skillDescription.active = false;
+    }
+    // Only resume movement if not hovering over the tape
+    if (!this.isHoveringSkillsTape) {
+      this.isSkillsTapePaused = false;
+    }
+    this.cdr.detectChanges();
+  }
+
+  getSkillsForTape() {
+    // Return skills duplicated 4 times for seamless infinite scroll
+    // This ensures items are always entering from the right as they exit left
+    // With 4 copies, we can move by 25% (one set) and have seamless looping
+    return [...this.skills, ...this.skills, ...this.skills, ...this.skills];
   }
 
   experiences: Experience[] = [
@@ -313,11 +423,34 @@ export class AppComponent implements OnInit, AfterViewInit, OnDestroy {
     this.cdr.detectChanges();
   }
 
-  openContactDialog() {
+  private isContactDialogOpen: boolean = false;
+
+  openContactDialog(event?: Event) {
+    // Prevent opening multiple dialogs
+    if (this.isContactDialogOpen) {
+      return;
+    }
+    
+    // Remove focus from button to prevent ripple color changes
+    if (event && event.target) {
+      (event.target as HTMLElement).blur();
+    }
+    
     import('./contact-dialog.component').then(({ ContactDialogComponent }) => {
-      this.dialog.open(ContactDialogComponent, {
+      this.isContactDialogOpen = true;
+      
+      const dialogRef = this.dialog.open(ContactDialogComponent, {
         panelClass: 'contact-dialog-panel',
         autoFocus: false
+      });
+      
+      dialogRef.afterClosed().subscribe(() => {
+        this.isContactDialogOpen = false;
+        
+        // Remove focus from any focused elements after dialog closes
+        if (document.activeElement instanceof HTMLElement) {
+          document.activeElement.blur();
+        }
       });
     });
   }
@@ -329,39 +462,57 @@ export class AppComponent implements OnInit, AfterViewInit, OnDestroy {
     }
   }
 
+  toggleDeviceTypes() {
+    // Clear any existing timer
+    if (this.deviceTypesTimer) {
+      clearTimeout(this.deviceTypesTimer);
+    }
+
+    // If already showing, fold it out
+    if (this.showDeviceTypes) {
+      this.isFoldingOut = true;
+      this.cdr.detectChanges();
+      
+      // Hide after animation completes
+      setTimeout(() => {
+        this.showDeviceTypes = false;
+        this.isFoldingOut = false;
+        this.cdr.detectChanges();
+      }, 600); // Match the foldUp animation duration
+      return;
+    }
+
+    // Show device types with fold down animation
+    this.isFoldingOut = false;
+    this.showDeviceTypes = true;
+    this.cdr.detectChanges();
+
+    // Hide after 10 seconds with fold up animation
+    this.deviceTypesTimer = setTimeout(() => {
+      this.isFoldingOut = true;
+      this.cdr.detectChanges();
+      
+      // Hide after animation completes
+      setTimeout(() => {
+        this.showDeviceTypes = false;
+        this.isFoldingOut = false;
+        this.cdr.detectChanges();
+      }, 600); // Match the foldUp animation duration
+    }, 10000);
+  }
+
+  getDeviceTypes() {
+    if (this.stats && this.stats.days && this.stats.days.length > 0 && this.stats.days[0].deviceTypes) {
+      return this.stats.days[0].deviceTypes;
+    }
+    return null;
+  }
+
   async ngOnInit() {
-    // Start the profile tracking session (non-blocking). Fetch location in background
-    this.locationService
-      .getLocation()
-      .then(loc => this.profileService.start(loc ?? undefined))
-      .catch(() => this.profileService.start())
-      .catch(err => {
-        console.warn('[profile] Start session failed (backend may be unavailable)', err);
-      });
+    // Initialize API calls in background (non-blocking)
+    this.initializeProfileTracking();
 
-    // Fetch stats (non-blocking)
-    this.profileService.statsToday().then(stats => {
-      this.stats = stats;
-      this.cdr.detectChanges();
-    }).catch(err => {
-      console.warn('[profile] Failed to fetch stats (using mock data for development)', err);
-      // Mock data for development when backend is unavailable
-      this.stats = {
-        tz: 'UTC',
-        days: [
-          {
-            day: new Date().toISOString().split('T')[0],
-            hourBuckets: { '18': 2 },
-            totalVisits: 42,
-            totalDurationMs: 26774,
-            avgDurationMs: 13387
-          }
-        ]
-      };
-      this.cdr.detectChanges();
-    });
-
-    // Initialize Intersection Observer for sections
+    // Initialize Intersection Observer for sections (always runs, independent of API)
     this.observer = new IntersectionObserver(
       (entries) => {
         entries.forEach(entry => {
@@ -373,9 +524,34 @@ export class AppComponent implements OnInit, AfterViewInit, OnDestroy {
           // Handle visibility for animations
           if (entry.isIntersecting) {
             section.visible = true;
+            
+            // Animate profile description paragraphs sequentially
+            if (sectionId === 'profile') {
+              const profileSection = section as typeof this.sectionState.profile;
+              // Mark image as animated after a delay to allow animation to complete
+              if (!profileSection.imageAnimated) {
+                setTimeout(() => {
+                  profileSection.imageAnimated = true;
+                  this.cdr.detectChanges();
+                }, 1500);
+              }
+              if (!profileSection.hasAnimated) {
+                // Delay description animation to allow image animation first
+                setTimeout(() => {
+                  profileSection.hasAnimated = true;
+                  this.animateProfileDescription();
+                }, 1000);
+              }
+            }
           } else {
             section.visible = false;
             section.hasAnimated = false;
+            // Reset profile description visibility
+            if (sectionId === 'profile') {
+              const profileSection = section as typeof this.sectionState.profile;
+              profileSection.imageAnimated = false;
+              this.profileDescriptionVisible = [];
+            }
           }
 
           // Store the intersection ratio for each section
@@ -463,6 +639,33 @@ export class AppComponent implements OnInit, AfterViewInit, OnDestroy {
 
     // Store the experience observer for cleanup
     this.experienceObserver = experienceObserver;
+  }
+
+  private async initializeProfileTracking() {
+    // Step 1: Start the profile tracking session first and wait for it to complete
+    try {
+      const location = await this.locationService.getLocation().catch(() => null);
+      const sessionId = await this.profileService.start(location ?? undefined);
+      
+      if (sessionId) {
+        // Step 2: Only after session is created, fetch stats
+        try {
+          const stats = await this.profileService.statsToday();
+          this.stats = stats;
+          this.cdr.detectChanges();
+
+          // Step 3: Only after stats are received, start heartbeat every 30 seconds
+          this.profileService.startHeartbeat(30000);
+        } catch (err) {
+          console.warn('[profile] Failed to fetch stats (backend may be unavailable)', err);
+          // Don't set mock data - button will remain hidden
+        }
+      } else {
+        console.warn('[profile] Start session failed (backend may be unavailable)');
+      }
+    } catch (err) {
+      console.warn('[profile] Start session failed (backend may be unavailable)', err);
+    }
   }
 
   private initializeChart(canvas: HTMLCanvasElement, techStack: TechStack, index: number): void {
@@ -570,6 +773,16 @@ export class AppComponent implements OnInit, AfterViewInit, OnDestroy {
     this.charts.forEach(chart => chart?.destroy());
     // Remove scroll listener
     window.removeEventListener('scroll', this.updateScrollProgress.bind(this));
+
+    // Clear device types timer
+    if (this.deviceTypesTimer) {
+      clearTimeout(this.deviceTypesTimer);
+    }
+
+    // Clear skill description timer
+    if (this.skillDescriptionTimer) {
+      clearTimeout(this.skillDescriptionTimer);
+    }
 
     // End the metrics session
     this.profileService

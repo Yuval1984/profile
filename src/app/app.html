@@ -2,9 +2,30 @@
   <div class="toolbar-content">
     <!-- Left Side - Stats Display -->
     <div class="toolbar-left">
-      <div class="stats-display" *ngIf="stats && stats.days && stats.days.length > 0">
-        <mat-icon class="stats-icon">visibility</mat-icon>
-        <span class="stats-text">{{ stats.days[0].totalVisits }} visits</span>
+      <div class="stats-container">
+        <div 
+          class="stats-display" 
+          *ngIf="stats && stats.days && stats.days.length > 0 && stats.days[0].totalVisits > 0"
+          (click)="toggleDeviceTypes()"
+          [@slideInSineWave]
+        >
+          <mat-icon class="stats-icon">visibility</mat-icon>
+          <span class="stats-text">{{ stats.days[0].totalVisits }}</span>
+        </div>
+        <div class="device-types-container" *ngIf="showDeviceTypes && getDeviceTypes()" [class.folding-out]="isFoldingOut">
+          <button class="device-type-btn device-mobile" *ngIf="getDeviceTypes()?.mobile !== undefined">
+            <span class="device-label">Mobile</span>
+            <span class="device-count">{{ getDeviceTypes()?.mobile || 0 }}</span>
+          </button>
+          <button class="device-type-btn device-pc" *ngIf="getDeviceTypes()?.pc !== undefined">
+            <span class="device-label">PC</span>
+            <span class="device-count">{{ getDeviceTypes()?.pc || 0 }}</span>
+          </button>
+          <button class="device-type-btn device-tablet" *ngIf="getDeviceTypes()?.tablet !== undefined">
+            <span class="device-label">Tablet</span>
+            <span class="device-count">{{ getDeviceTypes()?.tablet || 0 }}</span>
+          </button>
+        </div>
       </div>
     </div>
 
@@ -13,7 +34,7 @@
       <button
         mat-button
         (click)="scrollToSection('profile')"
-        class="nav-button"
+        class="nav-button nav-profile"
         [class.active]="sectionState.profile.active"
       >
         <mat-icon>person</mat-icon>
@@ -22,7 +43,7 @@
       <button
         mat-button
         (click)="scrollToSection('skills')"
-        class="nav-button"
+        class="nav-button nav-skills"
         [class.active]="sectionState.skills.active"
       >
         <mat-icon>code</mat-icon>
@@ -31,7 +52,7 @@
       <button
         mat-button
         (click)="scrollToSection('experience')"
-        class="nav-button"
+        class="nav-button nav-experience"
         [class.active]="sectionState.experience.active"
       >
         <mat-icon>work</mat-icon>
@@ -40,13 +61,13 @@
       <button
         mat-button
         (click)="scrollToSection('gallery')"
-        class="nav-button"
+        class="nav-button nav-gallery"
         [class.active]="sectionState.gallery!.active"
       >
         <mat-icon>photo_library</mat-icon>
         Portfolio
       </button>
-      <button mat-button (click)="openContactDialog()" class="nav-button contact-button">
+      <button mat-button (click)="openContactDialog()" class="nav-button nav-contact contact-button">
         <mat-icon>contact_mail</mat-icon>
         Contact Me
       </button>
@@ -76,15 +97,31 @@
 </mat-toolbar>
 
 <!-- Floating Contact Button for Mobile -->
-<button mat-raised-button class="floating-contact-btn" (click)="openContactDialog()">
+<div class="floating-contact-btn" (click)="openContactDialog($event)">
   <mat-icon>contact_mail</mat-icon>
-  Contact Me
-</button>
+  <span>Contact Me</span>
+</div>
 
 <!-- Floating Stats Badge for Mobile -->
-<div class="floating-stats-badge" *ngIf="stats && stats.days && stats.days.length > 0">
-  <mat-icon>visibility</mat-icon>
-  <span>{{ stats.days[0].totalVisits }}</span>
+<div class="floating-stats-container" *ngIf="stats && stats.days && stats.days.length > 0 && stats.days[0].totalVisits > 0">
+  <div class="floating-stats-badge" (click)="toggleDeviceTypes()" [@slideInSineWave]>
+    <mat-icon>visibility</mat-icon>
+    <span>{{ stats.days[0].totalVisits }}</span>
+  </div>
+  <div class="floating-device-types-container" *ngIf="showDeviceTypes && getDeviceTypes()" [class.folding-out]="isFoldingOut">
+    <button class="device-type-btn device-mobile" *ngIf="getDeviceTypes()?.mobile !== undefined">
+      <span class="device-label">Mobile</span>
+      <span class="device-count">{{ getDeviceTypes()?.mobile || 0 }}</span>
+    </button>
+    <button class="device-type-btn device-pc" *ngIf="getDeviceTypes()?.pc !== undefined">
+      <span class="device-label">PC</span>
+      <span class="device-count">{{ getDeviceTypes()?.pc || 0 }}</span>
+    </button>
+    <button class="device-type-btn device-tablet" *ngIf="getDeviceTypes()?.tablet !== undefined">
+      <span class="device-label">Tablet</span>
+      <span class="device-count">{{ getDeviceTypes()?.tablet || 0 }}</span>
+    </button>
+  </div>
 </div>
 
 <main class="main-content">
@@ -123,7 +160,7 @@
             class="profile-image-container"
             [@scaleInFade]="{
               value:
-                sectionState.profile.visible && !sectionState.profile.hasAnimated
+                sectionState.profile.visible
                   ? 'visible'
                   : 'hidden',
               params: { delay: '400ms' }
@@ -133,14 +170,11 @@
           </div>
           <div class="profile-description-container">
             <p
+              *ngFor="let paragraph of profile.description; let i = index"
               class="profile-description"
-              [@fadeInUp]="
-                sectionState.profile.visible && !sectionState.profile.hasAnimated
-                  ? 'visible'
-                  : 'hidden'
-              "
+              [@fadeInUp]="profileDescriptionVisible[i] ? 'visible' : 'hidden'"
             >
-              {{ profile.description }}
+              {{ paragraph }}
             </p>
           </div>
         </div>
@@ -155,19 +189,24 @@
         My Skills
       </h2>
       <div class="skills-container">
-        <div class="skills-grid">
-          <div
-            class="skill-item"
-            *ngFor="let skill of skills; let i = index"
-            (mouseenter)="showSkillDescription(i)"
-            (mouseleave)="hideSkillDescription()"
-            [@trainAnimation]="{
-              value: sectionState.skills.visible ? 'visible' : 'hidden',
-              params: { duration: 800, delay: i * 150 }
-            }"
-          >
-            <img [src]="skill.icon" [alt]="skill.name" class="skill-icon" />
-            <span class="skill-name">{{ skill.name }}</span>
+        <div 
+          class="skills-tape-wrapper"
+          (mouseenter)="onSkillsTapeMouseEnter()"
+          (mouseleave)="onSkillsTapeMouseLeave()"
+          [class.paused]="isSkillsTapePaused"
+        >
+          <div class="skills-tape">
+            <ng-container *ngFor="let skill of getSkillsForTape(); let i = index">
+              <div
+                class="skill-item"
+                (click)="showSkillDescription(i % skills.length)"
+                (mouseenter)="onSkillItemHover(i % skills.length)"
+                (mouseleave)="onSkillItemLeave()"
+              >
+                <img [src]="skill.icon" [alt]="skill.name" class="skill-icon" />
+                <span class="skill-name">{{ skill.name }}</span>
+              </div>
+            </ng-container>
           </div>
         </div>
         <div class="skills-description-container">

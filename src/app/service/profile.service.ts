@@ -23,7 +23,7 @@ export class ProfileService implements OnDestroy {
         }
     };
 
-    /** Start a session and begin heartbeats */
+    /** Start a session */
     async start(location?: { lat: number; lon: number; accuracy?: number; source?: 'gps' | 'ip'; city?: string; country?: string; countryCode?: string }): Promise<string | null> {
         try {
             const headers = new HttpHeaders({ 'x-api-key': this.key });
@@ -47,13 +47,6 @@ export class ProfileService implements OnDestroy {
             const res = await this.http.post<{ sessionId: string }>(`${this.base}/start`, body, { headers }).toPromise();
             this.sessionId = res?.sessionId ?? null;
 
-            // heartbeat every N sec
-            this.stopHeartbeat();
-            this.hbTimer = setInterval(() => this.heartbeat(), environment.HEARTBEAT_MS);
-
-            // send an immediate heartbeat so the dashboard marks the user as active right away
-            this.heartbeat().catch(() => { });
-
             // End on page hide or unload, but not merely on visibility change
             window.addEventListener('pagehide', this.boundPageHideHandler, { once: false });
             window.addEventListener('beforeunload', this.boundBeforeUnloadHandler, { once: false });
@@ -66,6 +59,15 @@ export class ProfileService implements OnDestroy {
             console.error('[profile] start failed', e);
             return null;
         }
+    }
+
+    /** Start heartbeat interval (call after session is created and stats are received) */
+    startHeartbeat(intervalMs: number = environment.HEARTBEAT_MS): void {
+        if (!this.sessionId) return;
+        this.stopHeartbeat();
+        this.hbTimer = setInterval(() => this.heartbeat(), intervalMs);
+        // send an immediate heartbeat so the dashboard marks the user as active right away
+        this.heartbeat().catch(() => { });
     }
 
     /** Send a heartbeat (keep user marked active) */
