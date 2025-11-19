@@ -107,7 +107,7 @@ export class AppComponent implements OnInit, AfterViewInit, OnDestroy {
     title: 'Senior Front-End Developer',
     education: 'B.Sc. in Computer Science',
     description: [
-      '• Nice to meet you — I\'m Yuval, a Senior Front-End Developer with 8+ years of experience building scalable Angular and React applications.',
+      '• Nice to meet you - I\'m Yuval, a Senior Front-End Developer with 8+ years of experience building scalable Angular and React applications.',
       '• I specialize in Angular 20, TypeScript, RxJS, Signals, NgRx, Angular Material, and CLI, as well as React with Hooks, Zustand, and MUI. I\'ve built complex UI architectures and high-performance data visualizations, including yFiles graphs with 10k+ nodes.',
       '• One of my key achievements is creating a reusable Angular component library that cut feature delivery time by 40%. I focus on clean, maintainable code, performance, and usability — crafting responsive UIs with HTML5, SCSS, Flexbox, and Grid.',
       '• I\'ve also mentored front-end teams, driven best practices, and helped align development with business goals. I\'m passionate about building front-end solutions that are powerful, fast, and a joy to use.'
@@ -340,11 +340,11 @@ export class AppComponent implements OnInit, AfterViewInit, OnDestroy {
         'yFiles': 20
       },
       details: [
-        'Lead Developer in a team of 4 engineers, delivering Angular 18 and TypeScript applications for the industrial automation sector.',
-        'Built a reusable Angular component library using standalone components, directives, pipes, signals, RxJS, Angular Material, Angular CLI, dependency injection, change detection, and NgRX for state management, cutting delivery time by 40% and reducing duplicate code.',
-        'Developed high-performance yFiles for HTML visualizations handling 10k+ nodes and edges.',
-        'Designed responsive UIs with HTML5, CSS3/SCSS, Flexbox, and CSS Grid, integrated with REST APIs.',
-        'Leveraged AI-assisted coding tools (Cursor IDE, GitHub Copilot, ChatGPT) to accelerate development and improve code quality.'
+        'Lead Developer in a team of 4 engineers, delivering Angular 20 and TypeScript applications for the industrial automation sector.',
+        'Built a reusable Angular component library using standalone components, directives, pipes, signals, deferrable views, RxJS, Angular Material, dependency injection, change detection, and NgRX - cutting delivery time by 40% and reducing duplicate code.',
+        'Built secure, high-performance data-visualization canvas (10k+ nodes) using yFiles for HTML.',
+        'Applied responsive and accessible design with HTML5, SCSS, FlexBox, and Angular Material.',
+        'Integrated AI-assisted tools (Cursor IDE, Claude, ChatGPT) into the development workflow, improving delivery speed and code consistency.'
       ]
     },
     {
@@ -360,10 +360,10 @@ export class AppComponent implements OnInit, AfterViewInit, OnDestroy {
         'Playwright': 15
       },
       details: [
-        'Built enterprise Angular (TypeScript, RxJS, SCSS) applications for customer service platforms.',
-        'Optimized page load performance, improving response times in live dashboards.',
-        'Implemented responsive layouts with CSS Grid, Flexbox, Bootstrap 5, and SCSS, improving accessibility and UI consistency.',
-        'Automated testing with Playwright and Karma-Jasmine, reducing manual QA time by 40%.'
+        'Built enterprise Angular applications (TypeScript, RxJS, SCSS) for customer service platforms.',
+        'Optimized performance in live dashboards using trackBy, async pipes, lazy-loading, and the OnPush change detection strategy, significantly improving load times and performance.',
+        'Delivered responsive and accessible UIs with CSS Grid, Flexbox, Bootstrap 5, and SCSS, ensuring design consistency across devices.',
+        'Automated testing with Playwright and Karma-Jasmine, reducing manual QA effort by 32%.'
       ]
     },
     {
@@ -379,7 +379,7 @@ export class AppComponent implements OnInit, AfterViewInit, OnDestroy {
         'SCSS': 15
       },
       details: [
-        'Built and maintained Angular (TypeScript, RxJS, SCSS) applications for four government portals, improving performance with trackBy, lazy-loading, and async pipes, while ensuring accessibility with ARIA labels.',
+        'Built and maintained Angular applications (TypeScript, RxJS, SCSS) for four government portals, improving performance with trackBy, lazy-loading, and async pipes, while ensuring accessibility with ARIA labels.',
         'Integrated REST APIs with Swagger/Postman, reducing request failure rates.',
         'Published hybrid mobile apps using Ionic and Cordova, deployed to Google Play.',
         'Collaborated with UI/UX designers to ensure consistent standards across projects.'
@@ -697,6 +697,13 @@ export class AppComponent implements OnInit, AfterViewInit, OnDestroy {
       options: {
         responsive: true,
         maintainAspectRatio: false,
+        onClick: () => {
+          // Disable click interactions to prevent removing skills
+        },
+        interaction: {
+          mode: 'nearest',
+          intersect: false
+        },
         plugins: {
           legend: {
             position: 'right',
@@ -706,7 +713,13 @@ export class AppComponent implements OnInit, AfterViewInit, OnDestroy {
                 size: 12
               },
               padding: 20
+            },
+            onClick: () => {
+              // Disable legend click to prevent removing skills
             }
+          },
+          tooltip: {
+            enabled: true
           }
         },
         animation: {
