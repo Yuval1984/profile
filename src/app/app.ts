@@ -66,6 +66,16 @@ export class AppComponent implements OnInit, AfterViewInit, OnDestroy {
 
   galleryItems = [
     {
+      image: 'assets/preview projects/private/cinema1.png',
+      title: 'Cinema App - Latest Movies',
+      description: 'A polished, responsive Cinema Dashboard built in React, showcasing smooth UI interactions and optimized rendering. The app lets users browse a large grid of movies and TV shows, filter by title type, perform instant search, switch between Cinema/Favourites views, and toggle dark mode. The interface uses useMemo, useCallback, React.memo, and MobX for state management to keep the UI fast, even with many posters on screen. HTTP requests are handled with Axios for efficient API communication. Each title card displays a poster, hover effects, and a favourite toggle, with real-time counters showing total titles and saved favourites. The layout is clean, modern, and fully responsive, designed to deliver a cinematic browsing experience.'
+    },
+    {
+      image: 'assets/preview projects/private/cinema2.png',
+      title: 'Cinema App - Movie Details',
+      description: 'A structured, high-fidelity movie detail page that displays full metadata for a selected title: large poster, release year, runtime, content type, rating, vote count, and genre tags. The view also includes a clean plot summary and a breakdown of technical details in well-organized cards. The page is fully state-driven and optimized with useMemo, useCallback, React.memo, and a global useContext store, ensuring smooth rendering and instant navigation across titles. A persistent top navigation bar provides quick access to Cinema, Favourites, Expand mode, counters, and Dark Mode. Features fully responsive design using Flexbox for seamless adaptation across all device sizes.'
+    },
+    {
       image: 'assets/preview projects/pharmecy/pharmecy.jpg',
       title: 'Pharmacy Dashboard',
       description: 'Comprehensive pharmacy management dashboard designed for pharmacists to monitor, approve, or reject patient medication requests. Features real-time patient medication tracking, prescription validation, drug interaction checking, and inventory management. Includes automated alerts for critical medications, dosage verification, and compliance monitoring. Enables pharmacists to efficiently manage patient care while ensuring medication safety and regulatory compliance.'
@@ -79,6 +89,26 @@ export class AppComponent implements OnInit, AfterViewInit, OnDestroy {
       image: 'assets/preview projects/dxc/5.png',
       title: 'Inspector Activity Dashboard',
       description: 'Comprehensive overview of individual inspector workload and performance metrics. Displays all assigned and completed inspections per inspector, including scheduled visits, current status, and inspection outcomes. Features timeline view of daily activities, inspection completion rates, and upcoming assignments. Includes detailed statistics on inspection types, durations, and findings per inspector.'
+    },
+    {
+      image: 'assets/preview projects/private/wheater1.png',
+      title: 'Weather App - Orlando Forecast',
+      description: 'A clean, responsive global weather app built with Angular 20, using Signals, control-flow blocks (@for / @if with track), OnPush, and standalone components for fast, reactive rendering. It lets users search any city via Geoapify, shows it on a Leaflet map, and fetches 1–5 day forecasts from OpenWeatherMap. Each card displays temperature, weather description, wind speed & direction, visibility, plus country, population, timezone, sunrise, and sunset — giving a rich, compact snapshot of the city\'s weather.'
+    },
+    {
+      image: 'assets/preview projects/private/wheater2.png',
+      title: 'Weather App - Los Angeles Forecast',
+      description: 'A clean, detailed weather view built with Angular 20, using Signals, control-flow blocks, OnPush, and standalone components for efficient, reactive UI updates. Each forecast card presents temperature, weather description, wind speed, wind direction, and visibility, using clear icons and structured sections. The header shows the city\'s country, population, timezone, sunrise, and sunset, giving a full snapshot of local conditions. The layout is fully responsive, built with Flexbox and CSS media queries, ensuring an adaptive design that scales smoothly across mobile, tablet, and desktop. Data is powered by Geoapify (city search + map) and OpenWeatherMap (1–5 day forecast), combined with interactive mapping via Leaflet.'
+    },
+    {
+      image: 'assets/preview projects/private/repairman.png',
+      title: 'Repairman Professional App',
+      description: 'A modern, responsive home-appliance repair website built with Angular 20, using control-flow blocks, FormControls, custom pipes, custom directives, Angular animations, and a standalone components architecture for a fast, polished UI. It\'s tailored for a professional technician servicing refrigerators, microwaves, ovens, washers, dryers, and more. The layout uses Flexbox and media queries for full responsiveness, integrates Resend for automatic service-request emails, and uses a Node.js tracking service on Render to monitor visitor activity and sessions.'
+    },
+    {
+      image: 'assets/preview projects/private/metrics.png',
+      title: 'Metrics Analytics Dashboard',
+      description: 'A self-hosted analytics dashboard built in React with Chart.js and WebSockets for real-time updates. It tracks my own apps and gives clear visibility into user behavior: how many users visited, when they visited, how long they stayed, and from which device and location they entered. All data is visualized in live charts and KPI cards, making it easy to monitor usage patterns across my applications in real time.'
     },
     {
       image: 'assets/preview projects/dxc/6.png',
