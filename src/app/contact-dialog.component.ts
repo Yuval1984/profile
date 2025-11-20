@@ -27,6 +27,20 @@ import { CommonModule } from '@angular/common';
           </button>
         </div>
         <div class="contact-item">
+          <mat-icon>chat</mat-icon>
+          <div class="contact-text">
+            <span class="label">WhatsApp</span>
+            <a href="https://wa.me/972508451651" target="_blank">050-845-1651</a>
+          </div>
+          <button 
+            class="copy-btn" 
+            (click)="copyToClipboard('+972508451651', 'whatsapp')"
+            [class.copied]="whatsappCopied"
+          >
+            <mat-icon>{{ whatsappCopied ? 'check' : 'content_copy' }}</mat-icon>
+          </button>
+        </div>
+        <div class="contact-item">
           <mat-icon>email</mat-icon>
           <div class="contact-text">
             <span class="label">Email</span>
@@ -322,14 +336,18 @@ import { CommonModule } from '@angular/common';
 })
 export class ContactDialogComponent {
   phoneCopied = false;
+  whatsappCopied = false;
   emailCopied = false;
   linkedinCopied = false;
 
-  copyToClipboard(text: string, type: 'phone' | 'email' | 'linkedin') {
+  copyToClipboard(text: string, type: 'phone' | 'whatsapp' | 'email' | 'linkedin') {
     navigator.clipboard.writeText(text).then(() => {
       if (type === 'phone') {
         this.phoneCopied = true;
         setTimeout(() => this.phoneCopied = false, 2000);
+      } else if (type === 'whatsapp') {
+        this.whatsappCopied = true;
+        setTimeout(() => this.whatsappCopied = false, 2000);
       } else if (type === 'email') {
         this.emailCopied = true;
         setTimeout(() => this.emailCopied = false, 2000);
