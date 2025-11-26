@@ -64,6 +64,11 @@ export class AppComponent implements OnInit, AfterViewInit, OnDestroy {
   isFoldingOut: boolean = false;
   private deviceTypesTimer: any = null;
 
+  // Projects menu visibility
+  isProjectsMenuVisible: boolean = false;
+  isFloatingProjectsMenuVisible: boolean = false;
+  private isClickingProjectsButton: boolean = false;
+
   galleryItems = [
     {
       image: 'assets/preview projects/private/cinema1.png',
@@ -450,6 +455,15 @@ export class AppComponent implements OnInit, AfterViewInit, OnDestroy {
     const documentHeight = document.documentElement.scrollHeight - windowHeight;
     const scrolled = window.scrollY;
     this.scrollProgress = (scrolled / documentHeight) * 100;
+    
+    // Hide projects menu on scroll, but not if user just clicked the button
+    if (this.isProjectsMenuVisible && !this.isClickingProjectsButton) {
+      this.hideProjectsMenu();
+    }
+    if (this.isFloatingProjectsMenuVisible && !this.isClickingProjectsButton) {
+      this.hideFloatingProjectsMenu();
+    }
+    
     this.cdr.detectChanges();
   }
 
@@ -490,6 +504,65 @@ export class AppComponent implements OnInit, AfterViewInit, OnDestroy {
     if (element) {
       element.scrollIntoView({ behavior: 'smooth', block: 'start' });
     }
+  }
+
+  showProjectsMenu() {
+    // Always show the menu, even if it was just hidden by scroll
+    this.isProjectsMenuVisible = true;
+    this.cdr.detectChanges();
+  }
+
+  hideProjectsMenu() {
+    this.isProjectsMenuVisible = false;
+    this.cdr.detectChanges();
+  }
+
+  toggleProjectsMenu(event?: Event) {
+    // Prevent event propagation to avoid conflicts
+    if (event) {
+      event.stopPropagation();
+    }
+    
+    // Toggle menu on click
+    this.isProjectsMenuVisible = !this.isProjectsMenuVisible;
+    this.cdr.detectChanges();
+  }
+
+  onProjectItemClick() {
+    // Hide both menus when a project link is clicked (desktop or mobile)
+    this.isProjectsMenuVisible = false;
+    this.isFloatingProjectsMenuVisible = false;
+    this.cdr.detectChanges();
+  }
+
+  showFloatingProjectsMenu() {
+    // Always show the menu, even if it was just hidden by scroll
+    this.isFloatingProjectsMenuVisible = true;
+    this.cdr.detectChanges();
+  }
+
+  hideFloatingProjectsMenu() {
+    this.isFloatingProjectsMenuVisible = false;
+    this.cdr.detectChanges();
+  }
+
+  toggleFloatingProjectsMenu(event?: Event) {
+    // Prevent event propagation to avoid conflicts
+    if (event) {
+      event.stopPropagation();
+    }
+    
+    // Set flag to prevent scroll from hiding menu immediately after click
+    this.isClickingProjectsButton = true;
+    
+    // Toggle menu on click
+    this.isFloatingProjectsMenuVisible = !this.isFloatingProjectsMenuVisible;
+    this.cdr.detectChanges();
+    
+    // Reset flag after a short delay
+    setTimeout(() => {
+      this.isClickingProjectsButton = false;
+    }, 300);
   }
 
   toggleDeviceTypes() {

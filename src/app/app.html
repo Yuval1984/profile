@@ -34,6 +34,7 @@
       <button
         mat-button
         (click)="scrollToSection('profile')"
+        (mouseenter)="hideProjectsMenu()"
         class="nav-button nav-profile"
         [class.active]="sectionState.profile.active"
       >
@@ -43,6 +44,7 @@
       <button
         mat-button
         (click)="scrollToSection('skills')"
+        (mouseenter)="hideProjectsMenu()"
         class="nav-button nav-skills"
         [class.active]="sectionState.skills.active"
       >
@@ -52,6 +54,7 @@
       <button
         mat-button
         (click)="scrollToSection('experience')"
+        (mouseenter)="hideProjectsMenu()"
         class="nav-button nav-experience"
         [class.active]="sectionState.experience.active"
       >
@@ -61,34 +64,33 @@
       <button
         mat-button
         (click)="scrollToSection('gallery')"
+        (mouseenter)="hideProjectsMenu()"
         class="nav-button nav-gallery"
         [class.active]="sectionState.gallery!.active"
       >
         <mat-icon>photo_library</mat-icon>
         Portfolio
       </button>
-      <button mat-button (click)="openContactDialog()" class="nav-button nav-contact contact-button">
+      <div class="nav-projects-wrapper" (mouseenter)="showProjectsMenu()">
+        <button mat-button class="nav-button nav-projects" (click)="toggleProjectsMenu($event)">
+          <mat-icon>rocket_launch</mat-icon>
+          Projects
+        </button>
+        <div class="projects-dropdown" [class.visible]="isProjectsMenuVisible" (mouseenter)="showProjectsMenu()">
+          <a href="https://yuval1984.github.io/weather-prediction/" target="_blank" class="project-item" (click)="onProjectItemClick()">
+            <mat-icon>wb_sunny</mat-icon>
+            <span>Weather Channel</span>
+          </a>
+          <a href="https://yuval1984.github.io/CinemaCenter/#/cinema" target="_blank" class="project-item" (click)="onProjectItemClick()">
+            <mat-icon>movie</mat-icon>
+            <span>Cinema Center</span>
+          </a>
+        </div>
+      </div>
+      <button mat-button (click)="openContactDialog()" (mouseenter)="hideProjectsMenu()" class="nav-button nav-contact contact-button">
         <mat-icon>contact_mail</mat-icon>
         Contact Me
       </button>
-      <mat-menu #projectsMenu="matMenu">
-        <button mat-menu-item>
-          <mat-icon>rocket_launch</mat-icon>
-          <span>Project 1</span>
-        </button>
-        <button mat-menu-item>
-          <mat-icon>rocket_launch</mat-icon>
-          <span>Project 2</span>
-        </button>
-        <button mat-menu-item>
-          <mat-icon>rocket_launch</mat-icon>
-          <span>Project 3</span>
-        </button>
-        <button mat-menu-item>
-          <mat-icon>rocket_launch</mat-icon>
-          <span>Project 4</span>
-        </button>
-      </mat-menu>
     </div>
   </div>
   <div class="scroll-progress-container">
@@ -97,9 +99,25 @@
 </mat-toolbar>
 
 <!-- Floating Contact Button for Mobile -->
-<div class="floating-contact-btn" (click)="openContactDialog($event)">
+<div class="floating-contact-btn" (click)="openContactDialog($event)" (mouseenter)="hideFloatingProjectsMenu()">
   <mat-icon>contact_mail</mat-icon>
   <span>Contact Me</span>
+</div>
+
+<!-- Floating Projects Button for Mobile -->
+<div class="floating-projects-btn" (click)="toggleFloatingProjectsMenu($event)">
+  <mat-icon>rocket_launch</mat-icon>
+  <span>Projects</span>
+  <div class="floating-projects-dropdown" [class.visible]="isFloatingProjectsMenuVisible" (click)="$event.stopPropagation()">
+    <a href="https://yuval1984.github.io/weather-prediction/" target="_blank" class="project-item" (click)="onProjectItemClick()">
+      <mat-icon>wb_sunny</mat-icon>
+      <span>Weather Channel</span>
+    </a>
+    <a href="https://yuval1984.github.io/CinemaCenter/#/cinema" target="_blank" class="project-item" (click)="onProjectItemClick()">
+      <mat-icon>movie</mat-icon>
+      <span>Cinema Center</span>
+    </a>
+  </div>
 </div>
 
 <!-- Floating Stats Badge for Mobile -->
